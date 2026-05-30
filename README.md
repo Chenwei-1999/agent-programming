@@ -62,6 +62,9 @@ clean code*, *be careful*. This skill keeps it grounded:
   throwaways.
 - Keeps a **two-tier** structure: cheap embedded judgment for ordinary work, and
   a deliberate path to primary sources for high-stakes or unfamiliar calls.
+- **Fetches the source on demand:** when a call is high-stakes, the agent finds
+  and reads the actual book — not just the distilled rules — and no PDFs ship
+  with the repo, so there is nothing to download or set up first.
 - Stays model-neutral: it names *roles* and maps them to whatever subagents your
   runtime provides.
 
@@ -93,8 +96,8 @@ Tier 1 — embedded judgment (always available)
         v
 Tier 2 — self-directed deep reference
   read references/<book>.md chapter map for the exact heading
-  scripts/read_book.py searches assets/<slug>.pdf (user-supplied)
-  optionally delegate the read-only lookup to a cheap scout subagent
+  agent fetches the right edition into assets/<slug>.pdf on demand
+  scripts/read_book.py searches it; or delegate the read to a scout subagent
         |
         v
 you integrate the evidence and make the call
@@ -122,12 +125,15 @@ sound judgment backed by evidence; delegation is only a cost optimization.
 
 The per-book catalogs in `references/` are the always-available distilled
 source and are sufficient for most work. **Raw book PDFs are not shipped with
-this skill** — no copies, no download links.
+this skill** — no copies, no download links bundled in the repo.
 
-When you need primary-source text (a high-stakes choice, a contested point, or a
-quote to cite), obtain a copy you are entitled to of the specific **edition**
-listed in `SKILL.md` → *Additional Resources*, and save it to the matching
-`assets/<slug>.pdf`. Then:
+Instead, when a problem needs primary-source text (a high-stakes choice, a
+contested point, or a quote to cite), the skill has the agent **find and fetch
+the book for you**: it uses the runtime's web-search/fetch tools to locate an
+available copy of the specific **edition** pinned in `SKILL.md` →
+*Additional Resources*, saves it to `assets/<slug>.pdf`, and reads it — no
+manual setup. (You stay in control of what gets fetched and are responsible for
+using copies you are entitled to in your jurisdiction.) Then:
 
 ```bash
 python3 scripts/read_book.py --list
