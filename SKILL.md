@@ -56,7 +56,7 @@ Calibrate effort to `expected lifespan × number of future readers`:
 
 ## Using This Skill
 
-This skill is **two tiers** and is meant to be portable across Codex, Claude Code, and any other agent runner:
+This skill is **two tiers** and is meant to be portable across Codex, Claude Code, Gemini CLI, OpenHands, and any other agent runner (see `references/agent-adapters.md` for per-runtime model/agent names and skill-install paths):
 
 - **Tier 1 — embedded competence (this document).** Parts 1–8 below distill enough actionable judgment to handle ordinary work directly: naming, functions, error handling, module & abstraction design, OO/data structures, architecture/SOLID/boundaries, systems-at-scale decisions, concurrency, testing, engineering-over-time, craft, and Python idioms. **Read these and act — you don't need to open a book for routine work.** For each smell, *name the principle, state the why, apply the fix* — naming turns "this feels off" into a defensible change.
 - **Tier 2 — self-directed deep reference.** When a problem is high-stakes, unfamiliar, or needs mechanics deliberately left out of Tier 1, **decide** you need the source, then consult the specific bundled catalog/book section yourself or delegate that read-only lookup to a cheap helper if the runner provides one. See *Deep reference (Tier 2)* at the end.
@@ -72,13 +72,17 @@ Use this section to adapt the skill to the runner you are in. The programming pr
 - **Keep helpers read-only by default.** Give them raw artifacts, paths, symptoms, or logs; ask for concrete evidence and file/heading references. Avoid giving them your intended answer unless the task is explicitly review/adversarial.
 - **Integrate and close.** Read the helper output, verify key claims when cheap, incorporate only the useful evidence, and stop using that helper thread.
 
-**Common adapter names**
+**Common adapter names** (model IDs current as of 2026-05 — see `references/agent-adapters.md` for discovery paths, the shared `.agents/skills/` location, frontmatter rules, rules-based runtimes, and source links)
 
-| Runner | Docs/research helper | Code-scan helper | Review/consult helper |
+| Runner | main-synthesizer | code-scout (read-only) | docs-scout (research) |
 |---|---|---|---|
-| Codex | `docs_researcher` on a cheap mini model for OpenAI/Codex/API docs and summaries | `code_scout` on a cheap code-tuned model for read-only scans and call-path evidence | bridge tools such as `claude_consult`, `claude_review`, or native review agents when configured |
-| Claude Code | `docs-researcher` on the cheapest configured research model | `code-scout` on the cheapest configured code model | native Claude review/consult flows or bridge tools when configured |
-| Generic agent runner | Any low-cost read-only research helper | Any low-cost read-only code/search helper | Any independent reviewer/consultant with a self-contained prompt |
+| Codex | `gpt-5.5` | `gpt-5.3-codex-spark` † | `gpt-5.4-mini` |
+| Claude Code | `claude-opus-4-8` (`opus`) | built-in `Explore` agent (Haiku) | custom agent · `claude-haiku-4-5` |
+| Gemini CLI | Pro tier | Flash (auto `activate_skill`) | Flash-Lite |
+| OpenHands | configured strong model | fast model via `SKILL.md` | configured cheap model |
+| Generic / rules-based | strongest configured model | cheapest read-only code worker | cheapest read-only docs worker |
+
+† `gpt-5.3-codex-spark` is OpenAI's near-instant, text-only model — fastest for read-only scanning, but it **requires ChatGPT Pro** (research preview). Without Pro, use `gpt-5.4-mini`, OpenAI's documented subagent model. For Gemini, use the current Pro/Flash/Flash-Lite IDs from `ai.google.dev`. Rules-based runtimes (Cursor, Aider, Continue, Windsurf) are model-agnostic: load this skill via their rules/modes and route the scout role to your configured fast model. For review/consult, use the runner's native review agents or an external consult/review bridge when configured.
 
 **Bridge/consult tools.** If the runner exposes an external consult/review bridge, use it only when it has clear value: hard architecture trade-offs, unclear root-cause debugging after local evidence gathering, or independent review before a PR/merge. Batch context into one self-contained prompt. Do not use bridge tools for boilerplate, obvious API naming, or anything requiring hidden conversation context.
 

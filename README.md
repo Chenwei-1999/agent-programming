@@ -109,14 +109,29 @@ and the main agent always owns the final judgment.
 
 ## Agent Adapters
 
-The skill does not require one specific model. It names roles and maps them to
-whatever your coding agent supports.
+The skill does not require one specific model. It names three roles and maps
+them to whatever your coding agent supports. Model IDs below were current as of
+**2026-05** — see `references/agent-adapters.md` for discovery paths, frontmatter
+rules, and source links.
 
-| Role | Job | Codex adapter | Claude Code adapter | Gemini CLI adapter | Generic coding agents |
-|------|-----|---------------|---------------------|--------------------|-----------------------|
-| `docs-scout` | Read a `references/<book>.md` section or a book PDF and report the answer | `docs_researcher` / mini model | `docs-researcher` (Haiku-class) | Gemini docs/search session | cheap read-only docs worker |
-| `code-scout` | Find where the answer lives in the codebase | `code_scout` / `GPT-5.3-Codex-Spark` | `code-scout` (Sonnet-class) | read-only Gemini session | fast read-only code scanner |
-| `main-synthesizer` | Weigh the evidence and make the call | current main agent | Opus/Sonnet-class main agent | primary Gemini CLI session | strongest available agent |
+| Role | Codex CLI | Claude Code | Gemini CLI | OpenHands |
+|------|-----------|-------------|------------|-----------|
+| `main-synthesizer` — weigh evidence, decide | `gpt-5.5` | `claude-opus-4-8` (`opus`) | Gemini **Pro** tier | configured strong model |
+| `code-scout` — find where the answer lives | `gpt-5.3-codex-spark` † | built-in **Explore** agent (Haiku) | Gemini **Flash** | fast model via `SKILL.md` |
+| `docs-scout` — read a catalog/book section | `gpt-5.4-mini` | custom agent · `claude-haiku-4-5` | **Flash-Lite** | configured cheap model |
+
+† `gpt-5.3-codex-spark` is OpenAI's near-instant, text-only model — fastest for
+read-only scanning, but it **requires ChatGPT Pro** (research preview). Without
+Pro, use `gpt-5.4-mini`, the model OpenAI documents for subagents. For Gemini,
+use the current Pro/Flash/Flash-Lite IDs from
+[ai.google.dev](https://ai.google.dev/gemini-api/docs/models) (version strings
+move fast).
+
+**Rules / modes-based agents** (Cursor, Aider, Continue, Windsurf) don't
+auto-load `SKILL.md` and are model-agnostic — point them at this skill via their
+rules / custom-mode mechanism and route `code-scout` to your configured fast
+model, `main-synthesizer` to your strongest. (Aider's architect + editor model
+split maps naturally onto synthesizer + scout.)
 
 If a runtime has no subagents, do the same lookups inline. The quality goal is
 sound judgment backed by evidence; delegation is only a cost optimization.
@@ -148,21 +163,28 @@ of the same edition. See `assets/README.md` for details.
 
 ## Manual Install
 
-Clone the repo into your agent's skills directory under the name `programmer`:
+This is a standard Agent Skills (`agentskills.io`) directory, so the four
+SKILL.md-native runtimes auto-discover it once it's in a skills folder named
+`programmer`. The highest-leverage spot is `~/.agents/skills/` — Codex's
+**primary** discovery path *and* Gemini CLI's interop alias, so one clone serves
+both:
 
 ```bash
-git clone https://github.com/Chenwei-1999/agent-programming.git ~/.claude/skills/programmer
+# Codex CLI + Gemini CLI (shared .agents/skills location)
+git clone https://github.com/Chenwei-1999/agent-programming.git ~/.agents/skills/programmer
 ```
 
-Common skill locations:
+Per-runtime skill locations:
 
-- Codex: `~/.codex/skills/programmer`
-- Claude Code: `~/.claude/skills/programmer`
-- Gemini CLI: `~/.gemini/skills/programmer`
-- Generic local agents: `~/.agents/skills/programmer`
+- **Codex CLI:** `~/.agents/skills/programmer` (user) or `.agents/skills/programmer` in a repo — **not** `~/.codex/skills`, which holds only config.
+- **Claude Code:** `~/.claude/skills/programmer` (personal) or `.claude/skills/programmer` (project). Copy it here rather than symlinking.
+- **Gemini CLI:** `~/.gemini/skills/programmer` or the shared `~/.agents/skills/programmer` alias. It activates automatically via `activate_skill`.
+- **OpenHands:** its configured skills directory (supports the same `SKILL.md` standard, plus keyword `triggers`).
 
-For Cursor, Continue, Aider, OpenHands, or another runtime with its own
-convention, clone into that runtime's skill directory instead.
+**Rules / modes-based agents** (Cursor, Aider, Continue, Windsurf) don't
+auto-discover skill directories — reference `SKILL.md` through their rules,
+`AGENTS.md`, or custom-mode mechanism instead. See `references/agent-adapters.md`
+for the details and per-runtime model routing.
 
 ## Package Layout
 
@@ -171,6 +193,7 @@ programmer/
   README.md
   SKILL.md                       # router + judgment, rules tagged by book
   references/
+    agent-adapters.md            # per-runtime model/agent names + install paths
     aposd-complexity.md
     clean-code.md
     code-complete.md
