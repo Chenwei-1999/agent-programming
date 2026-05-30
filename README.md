@@ -115,7 +115,7 @@ whatever your coding agent supports.
 | Role | Job | Codex adapter | Claude Code adapter | Gemini CLI adapter | Generic coding agents |
 |------|-----|---------------|---------------------|--------------------|-----------------------|
 | `docs-scout` | Read a `references/<book>.md` section or a book PDF and report the answer | `docs_researcher` / mini model | `docs-researcher` (Haiku-class) | Gemini docs/search session | cheap read-only docs worker |
-| `code-scout` | Find where the answer lives in the codebase | `code_scout` / fast model | `code-scout` (Sonnet-class) | read-only Gemini session | fast read-only code scanner |
+| `code-scout` | Find where the answer lives in the codebase | `code_scout` / `GPT-5.3-Codex-Spark` | `code-scout` (Sonnet-class) | read-only Gemini session | fast read-only code scanner |
 | `main-synthesizer` | Weigh the evidence and make the call | current main agent | Opus/Sonnet-class main agent | primary Gemini CLI session | strongest available agent |
 
 If a runtime has no subagents, do the same lookups inline. The quality goal is
